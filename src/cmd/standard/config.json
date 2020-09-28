@@ -1,0 +1,33 @@
+{
+  "files": [
+    {
+      "path": "../../../resource/standard/.editorconfig",
+      "name": ".editorconfig",
+      "description": "编辑器配置文件：.editorconfig",
+      "needDepend": []
+    },
+    {
+      "path": "../../../resource/standard/.eslintrc.js",
+      "name": ".eslintrc.js",
+      "description": "eslint配置文件：.eslintrc.js",
+      "needDepend": ["eslint","@umijs/fabric","eslint-plugin-react-hooks"]
+    },
+    {
+      "path": "../../../resource/standard/.prettierrc.js",
+      "name": ".prettierrc.js",
+      "description": "prettier配置文件：.prettierrc.js",
+      "needDepend": ["prettier","@umijs/fabric"]
+    },
+    {
+      "path": "../../../resource/standard/.stylelintrc.js",
+      "name": ".stylelintrc.js",
+      "description": "stylelint配置文件：.stylelintrc.js",
+      "needDepend": ["@umijs/fabric"]
+    }
+  ],
+  "scripts": {
+    "prettier": "prettier -c --write \"src/**/*\"",
+    "style-fix": "stylelint --fix \"src/**/*.less\" --syntax less",
+    "eslint-fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src"
+  }
+}
