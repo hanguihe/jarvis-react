@@ -1,4 +1,4 @@
-import parser from 'yargs-parser';
+import parser from "yargs-parser";
 import logger from './util/logger';
 
 const args = parser(process.argv.splice(2), {
