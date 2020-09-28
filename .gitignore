@@ -1,0 +1,9 @@
+# editor
+.idea
+.vscode
+
+# node_modules
+node_modules
+
+# yarn
+yarn-error.log

@@ -1,0 +1,23 @@
+{
+  "name": "jarvis-react",
+  "version": "0.0.1",
+  "description": "React脚手架及命令行工具合集",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanguihe/jarvis-react.git"
+  },
+  "keywords": [
+    "React",
+    "Jarvis"
+  ],
+  "author": "hanguihe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hanguihe/jarvis-react/issues"
+  },
+  "homepage": "https://github.com/hanguihe/jarvis-react#readme"
+}
