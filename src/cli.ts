@@ -1,12 +1,12 @@
-import parser from "yargs-parser";
-import logger from "./util/logger";
+import parser from 'yargs-parser';
+import logger from './util/logger';
 
 const args = parser(process.argv.splice(2), {
   alias: {
-    version: ["v"],
-    help: ["h"],
+    version: ['v'],
+    help: ['h'],
   },
-  boolean: ["version"],
+  boolean: ['version'],
 });
 
 /**
@@ -20,25 +20,25 @@ const args = parser(process.argv.splice(2), {
  */
 
 if (args.version && !args._[0]) {
-  args._[0] = "version";
-  const info = require("../package.json");
+  args._[0] = 'version';
+  const info = require('../package.json');
   logger.cyan(`jarvis @${info.version}`);
 } else if (!args._[0]) {
-  args._[0] = "help";
+  args._[0] = 'help';
 }
 
 switch (args._[0]) {
-  case "new":
-    logger.cyan("执行新建项目命令");
+  case 'new':
+    logger.cyan('执行新建项目命令');
     break;
-  case "dev":
-    logger.cyan("执行dev命令");
+  case 'dev':
+    logger.cyan('执行dev命令');
     break;
-  case "build":
-    logger.cyan("执行构建命令");
+  case 'build':
+    logger.cyan('执行构建命令');
     break;
-  case "standard":
-    require("./cmd/standard/index");
+  case 'standard':
+    require('./cmd/standard/index');
     break;
   default:
     break;

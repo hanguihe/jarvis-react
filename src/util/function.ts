@@ -1,7 +1,7 @@
-import { resolve } from "path";
-import { prompt } from "inquirer";
-import { cyan } from "chalk";
-import ora from "ora";
+import { resolve } from 'path';
+import { prompt } from 'inquirer';
+import { cyan } from 'chalk';
+import ora from 'ora';
 
 /**
  * @description 终端交互 - 询问
@@ -11,8 +11,8 @@ import ora from "ora";
 export async function confirm(message: string) {
   const { answer } = await prompt([
     {
-      type: "confirm",
-      name: "answer",
+      type: 'confirm',
+      name: 'answer',
       message,
       default: true,
     },

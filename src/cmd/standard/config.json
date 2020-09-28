@@ -10,13 +10,13 @@
       "path": "../../../resource/standard/.eslintrc.js",
       "name": ".eslintrc.js",
       "description": "eslint配置文件：.eslintrc.js",
-      "needDepend": ["eslint","@umijs/fabric","eslint-plugin-react-hooks"]
+      "needDepend": ["eslint", "@umijs/fabric", "eslint-plugin-react-hooks"]
     },
     {
       "path": "../../../resource/standard/.prettierrc.js",
       "name": ".prettierrc.js",
       "description": "prettier配置文件：.prettierrc.js",
-      "needDepend": ["prettier","@umijs/fabric"]
+      "needDepend": ["prettier", "@umijs/fabric"]
     },
     {
       "path": "../../../resource/standard/.stylelintrc.js",
