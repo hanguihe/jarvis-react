@@ -28,8 +28,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "prettier": "prettier -c --write \"src/**/*\"",
-    "precommit": "npm run prettier"
+    "prettier": "prettier -c --write \"src/**/*\""
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run prettier"
+    }
   },
   "author": "hanguihe <592029487@qq.com> (https://github.com/hanguihe)",
   "license": "MIT",
