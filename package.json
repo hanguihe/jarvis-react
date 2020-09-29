@@ -28,7 +28,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prettier": "prettier -c --write \"src/**/*\""
+    "prettier": "prettier -c --write \"src/**/*\"",
+    "prepublish": "npm run prettier && npm run build"
   },
   "husky": {
     "hooks": {
