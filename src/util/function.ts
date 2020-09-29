@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { prompt } from 'inquirer';
 import { cyan } from 'chalk';
 import ora from 'ora';
+import { readFileSync, writeFileSync } from 'fs';
 
 /**
  * @description 终端交互 - 询问
@@ -17,7 +18,6 @@ export async function confirm(message: string) {
       default: true,
     },
   ]);
-
   return answer;
 }
 
@@ -32,3 +32,14 @@ export const logger = {
     return ora().succeed(text);
   },
 };
+
+/**
+ * 读取项目package.json文件
+ */
+export function getPackageInfo() {
+  return JSON.parse(readFileSync(`${process.cwd()}/package.json`, 'utf-8'));
+}
+
+export function writePackageInfo(info: any) {
+  writeFileSync(`${process.cwd()}/package.json`, JSON.stringify(info));
+}

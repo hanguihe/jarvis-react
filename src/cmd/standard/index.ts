@@ -1,40 +1,28 @@
-import { readdirSync, copyFileSync, readFileSync } from 'fs';
+import { readdirSync, copyFileSync } from 'fs';
 import { resolve } from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import ora from 'ora';
 import { sync as command } from 'command-exists';
-import { confirm, logger } from '../../util/function';
+import { confirm, getPackageInfo, logger, writePackageInfo } from '../../util/function';
 import config from './config.json';
 
 async function main() {
   logger.cyan('🔨 初始化项目工程化规范\n');
 
   // 写入配置文件
-  const deps = await write();
+  const deps = await writeConfigFile();
 
-  // 获取package.json并判断是否需要增加依赖项
-  const info = getPackageInfo();
-  const projectDeps = [...Object.keys(info.dependencies), ...Object.keys(info.devDependencies)];
-
-  const needInstall = deps
-    .map((item) => {
-      if (!projectDeps.includes(item)) {
-        return item;
-      }
-      return false;
-    })
-    .filter(Boolean);
-
-  if (needInstall.length > 0) {
-    await installDeps(needInstall.join(' '));
-  }
+  // 安装必须依赖项
+  await installProjectDeps(deps);
 
   // 询问是否增加script脚本
+  await insertPackageInfo();
 }
 
 main()
   .then(() => {
+    logger.cyan('🚀 DONE');
     process.exit(0);
   })
   .catch((err) => {
@@ -43,7 +31,7 @@ main()
   });
 
 // 写入配置文件
-async function write() {
+async function writeConfigFile() {
   const cwd = process.cwd();
   const projectFileList = readdirSync(cwd);
 
@@ -74,13 +62,26 @@ async function write() {
   return [...new Set(dependList)];
 }
 
-// 读取项目依赖项
-function getPackageInfo() {
-  return JSON.parse(readFileSync(`${process.cwd()}/package.json`, 'utf-8'));
-}
-
 // 安装依赖项
-async function installDeps(names: string) {
+async function installProjectDeps(deps: string[]) {
+  const info = getPackageInfo();
+  const { dependencies = [], devDependencies = [] } = info;
+  const projectDeps = [...Object.keys(dependencies), ...Object.keys(devDependencies)];
+
+  const names = deps
+    .map((item) => {
+      if (!projectDeps.includes(item)) {
+        return item;
+      }
+      return false;
+    })
+    .filter(Boolean)
+    .join(' ');
+
+  if (!names) {
+    return;
+  }
+
   let cmd = '';
 
   if (command('yarn')) {
@@ -99,4 +100,30 @@ async function installDeps(names: string) {
 
   spinner.stop();
   logger.cyan('🚀 项目依赖安装成功！');
+}
+
+// 增加script脚本
+async function insertPackageInfo() {
+  const answer = await confirm('是否需要增加script脚本？');
+  if (!answer) {
+    return;
+  }
+
+  const { scripts } = config;
+  const info = getPackageInfo();
+
+  if (!info.scripts) {
+    info.scripts = {};
+  }
+  const keys = Object.keys(info.scripts);
+
+  Object.keys(scripts).forEach((key) => {
+    if (!keys.includes(key)) {
+      info.scripts[key] = scripts[key];
+    }
+  });
+  // 写入package.json
+  writePackageInfo(info);
+
+  logger.success('写入script脚本成功！\n');
 }
