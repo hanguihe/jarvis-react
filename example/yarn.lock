@@ -4976,10 +4976,10 @@ isobject@^3.0.0, isobject@^3.0.1:
   resolved "https://registry.npm.taobao.org/isobject/download/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
 
-jarvis-react@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.npm.taobao.org/jarvis-react/download/jarvis-react-0.2.1.tgz#5bff107052d56339bd77e2066a9809a3709e2a7e"
-  integrity sha1-W/8QcFLVYzm9d+IGapgJo3CeKn4=
+jarvis-react@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/jarvis-react/-/jarvis-react-0.2.2.tgz#46422c2096f962978254244f27a6d62ab1a6e716"
+  integrity sha512-tqxC/5RzzuQD21PXHlmJMEUuvXBYbO2sMAD2MBAwc8BEfGSXaNrXAohnQfRiUPdejGW20hw6slrPFLyo1SfQdA==
   dependencies:
     "@babel/core" "^7.11.6"
     "@babel/plugin-proposal-decorators" "^7.10.5"
