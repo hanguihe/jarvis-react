@@ -7,8 +7,7 @@
   "types": "types.d.ts",
   "files": [
     "lib",
-    "dist",
-    "types.d.ts",
+    "resource",
     "bin"
   ],
   "sideEffects": false,
