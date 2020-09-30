@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { prompt } from 'inquirer';
-import { cyan } from 'chalk';
+import { cyan, gray } from 'chalk';
 import ora from 'ora';
 import { readFileSync, writeFileSync } from 'fs';
 
@@ -28,6 +28,9 @@ export const logger = {
   cyan: (text: string) => {
     console.log(cyan(text));
   },
+  gray: (text: string) => {
+    console.log(gray(text));
+  },
   success: (text: string) => {
     return ora().succeed(text);
   },
@@ -42,4 +45,8 @@ export function getPackageInfo() {
 
 export function writePackageInfo(info: any) {
   writeFileSync(`${process.cwd()}/package.json`, JSON.stringify(info));
+}
+
+export function getLocalModulesPath(name: string) {
+  return resolve(__dirname, `../../node_modules/${name}`);
 }

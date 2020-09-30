@@ -1,0 +1,11 @@
+{
+  "port": 3000,
+  "open": false,
+  "compress": true,
+  "hot": true,
+  "hotOnly": false,
+  "clientLogLevel": "none",
+  "stats": "none",
+  "quiet": true,
+  "overlay": true
+}

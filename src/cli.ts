@@ -1,5 +1,5 @@
 import parser from 'yargs-parser';
-import logger from './util/logger';
+import { logger } from './util/function';
 
 const args = parser(process.argv.splice(2), {
   alias: {
@@ -32,7 +32,8 @@ switch (args._[0]) {
     logger.cyan('执行新建项目命令');
     break;
   case 'dev':
-    logger.cyan('执行dev命令');
+    logger.gray('$ jarvis dev');
+    require('./cmd/dev/index');
     break;
   case 'build':
     logger.cyan('执行构建命令');
