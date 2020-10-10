@@ -11,7 +11,3 @@ const render = () => {
 };
 
 render();
-
-if (module.hot) {
-  module.hot.accept('./pages/home', render);
-}

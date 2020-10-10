@@ -13,9 +13,21 @@
       "needDepend": ["eslint", "@umijs/fabric", "eslint-plugin-react-hooks"]
     },
     {
+      "path": "../../../resource/standard/.eslintignore",
+      "name": ".eslintignore",
+      "description": "eslint忽略文件：.eslintignore",
+      "needDepend": []
+    },
+    {
       "path": "../../../resource/standard/.prettierrc.js",
       "name": ".prettierrc.js",
       "description": "prettier配置文件：.prettierrc.js",
+      "needDepend": ["prettier", "@umijs/fabric"]
+    },
+    {
+      "path": "../../../resource/standard/.prettierignore",
+      "name": ".prettierignore",
+      "description": "prettier忽略文件：.prettierignore",
       "needDepend": ["prettier", "@umijs/fabric"]
     },
     {
@@ -23,6 +35,18 @@
       "name": ".stylelintrc.js",
       "description": "stylelint配置文件：.stylelintrc.js",
       "needDepend": ["@umijs/fabric"]
+    },
+    {
+      "path": "../../../resource/standard/tsconfig.json",
+      "name": "tsconfig.json",
+      "description": "typescript配置文件：tsconfig.json",
+      "needDepend": []
+    },
+    {
+      "path": "../../../resource/standard/jsconfig.json",
+      "name": "jsconfig.json",
+      "description": "javascript配置文件：jsconfig.json",
+      "needDepend": []
     }
   ],
   "scripts": {

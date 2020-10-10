@@ -4,7 +4,12 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import ora from 'ora';
 import { sync as command } from 'command-exists';
-import { confirm, getPackageInfo, logger, writePackageInfo } from '../../util/function';
+import {
+  confirm,
+  getPackageInfo,
+  logger,
+  writePackageInfo,
+} from '../../util/function';
 import config from './config.json';
 
 async function main() {
@@ -26,8 +31,7 @@ main()
     process.exit(0);
   })
   .catch((err) => {
-    console.error(err);
-    process.exit(1);
+    throw new Error(err);
   });
 
 // 写入配置文件
@@ -66,7 +70,10 @@ async function writeConfigFile() {
 async function installProjectDeps(deps: string[]) {
   const info = getPackageInfo();
   const { dependencies = [], devDependencies = [] } = info;
-  const projectDeps = [...Object.keys(dependencies), ...Object.keys(devDependencies)];
+  const projectDeps = [
+    ...Object.keys(dependencies),
+    ...Object.keys(devDependencies),
+  ];
 
   const names = deps
     .map((item) => {

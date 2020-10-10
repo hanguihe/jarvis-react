@@ -1,8 +1,9 @@
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { Configuration } from 'webpack';
 import WebpackBar from 'webpackbar';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import webpack, { Configuration } from 'webpack';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 
 export default (env: string = 'production'): Configuration => {
   const cwd = process.cwd();
@@ -62,13 +63,21 @@ export default (env: string = 'production'): Configuration => {
         },
         {
           test: /.(tsx|ts|jsx|js)$/,
-          loader: resolve('babel-loader'),
+          loader: `${resolve('babel-loader')}?cacheDirectory`,
           exclude: `${cwd}/node_modules`,
           include: `${cwd}/src`,
           options: {
-            presets: [resolve('@babel/preset-env'), resolve('@babel/preset-react')],
+            presets: [
+              resolve('@babel/preset-env'),
+              resolve('@babel/preset-react'),
+            ],
             plugins: [
-              [resolve('@babel/plugin-proposal-decorators'), { decoratorsBeforeExport: true }],
+              // 使用react官方最新热更新方案
+              isDev && resolve('react-refresh/babel'),
+              [
+                resolve('@babel/plugin-proposal-decorators'),
+                { decoratorsBeforeExport: true },
+              ],
               [
                 resolve('babel-plugin-import'),
                 {
@@ -77,7 +86,7 @@ export default (env: string = 'production'): Configuration => {
                   style: true,
                 },
               ],
-            ],
+            ].filter(Boolean),
           },
         },
         {
@@ -96,7 +105,8 @@ export default (env: string = 'production'): Configuration => {
       new HtmlWebpackPlugin({
         template: `${cwd}/public/index.html`,
       }),
-      isDev && new webpack.HotModuleReplacementPlugin(),
+      // 当前官方方案并不完美，需要设置window全局属性，故引入社区plugin减少配置
+      isDev && new ReactRefreshPlugin(),
       !isDev &&
         new MiniCssExtractPlugin({
           filename: 'jarvis.[hash:8].css',
