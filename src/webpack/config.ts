@@ -1,116 +1,166 @@
-import { Configuration } from 'webpack';
-import WebpackBar from 'webpackbar';
+import { Configuration, ProgressPlugin } from 'webpack';
+
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import FriendlyWebpackPlugin from 'friendly-errors-webpack-plugin';
+import { default as ESBuildPlugin } from 'esbuild-webpack-plugin';
+
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 
-export default (env: string = 'production'): Configuration => {
-  const cwd = process.cwd();
-  const resolve = (name: string) => require.resolve(name);
-  const isDev = env === 'development';
+function resolve(name: string) {
+  return require.resolve(name);
+}
 
-  const getStyleLoaders = (type: string = 'css') =>
-    [
-      isDev && resolve('style-loader'),
-      !isDev && {
-        loader: MiniCssExtractPlugin.loader,
-        options: { esModule: true },
+function join(name: string) {
+  return `${process.cwd()}/${name}`;
+}
+
+function getStyleLoaders(type: 'css' | 'less', isDev: boolean) {
+  return [
+    isDev && resolve('style-loader'),
+    !isDev && {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        esModule: true,
       },
-      {
-        loader: resolve('css-loader'),
-        options: {
-          importLoaders: Number(type === 'css'),
-          modules: false,
+    },
+    {
+      loader: resolve('css-loader'),
+      options: {
+        importLoaders: Number(type === 'css'),
+        sourceMap: isDev,
+        modules: {
+          auto: true,
         },
       },
-      type === 'less' && {
-        loader: resolve('less-loader'),
-        options: {
-          lessOptions: {
-            javascriptEnabled: true,
-          },
+    },
+    type === 'less' && {
+      loader: resolve('less-loader'),
+      options: {
+        lessOptions: {
+          javascriptEnabled: true,
         },
       },
-    ].filter(Boolean);
+    },
+  ].filter(Boolean);
+}
+
+export default function () {
+  const env = process.env.NODE_ENV;
+  const isDevelopment = env === 'development';
+  const isProduction = env === 'production';
 
   return {
     mode: env,
-    entry: `${cwd}/src`,
+    entry: join('src/app'),
     output: {
       filename: 'jarvis.[hash:8].js',
-      path: `${cwd}/dist`,
+      chunkFilename: 'jarvis-chunk.[hash:9].js',
+      path: join('dist'),
+      publicPath: './',
     },
-    devtool: isDev ? 'cheap-module-source-map' : 'none',
-    stats: 'none',
+    devtool: isDevelopment ? 'cheap-module-source-map' : 'none',
+    stats: isDevelopment
+      ? 'none'
+      : {
+          all: false,
+          assets: true,
+          builtAt: true,
+          errors: true,
+          errorDetails: true,
+          timings: true,
+          version: true,
+          warnings: true,
+        },
     resolve: {
       extensions: ['.tsx', '.ts', '.jsx', '.js'],
+      alias: {
+        '@': join('src'),
+      },
     },
-    performance: {
-      hints: false,
+    optimization: {
+      // minimizer: [new ESBuildPlugin()],
+      splitChunks: {
+        chunks: 'all',
+      },
     },
+    performance: false,
     module: {
       rules: [
         {
-          test: /\.(bmp|gif|jpe?g|png)$/,
-          use: {
-            loader: resolve('url-loader'),
-            options: {
-              name: 'static/assets/[name].[hash:8].[ext]',
-              limit: 1024 * 10,
-            },
-          },
-        },
-        {
-          test: /.(tsx|ts|jsx|js)$/,
-          loader: `${resolve('babel-loader')}?cacheDirectory`,
-          exclude: `${cwd}/node_modules`,
-          include: `${cwd}/src`,
-          options: {
-            presets: [
-              resolve('@babel/preset-env'),
-              resolve('@babel/preset-react'),
-            ],
-            plugins: [
-              // 使用react官方最新热更新方案
-              isDev && resolve('react-refresh/babel'),
-              [
-                resolve('@babel/plugin-proposal-decorators'),
-                { decoratorsBeforeExport: true },
-              ],
-              [
-                resolve('babel-plugin-import'),
-                {
-                  libraryName: 'antd',
-                  libraryDirectory: 'es',
-                  style: true,
+          oneOf: [
+            {
+              test: /\.(bmp|gif|jpe?g|png)$/,
+              use: {
+                loader: resolve('url-loader'),
+                options: {
+                  name: 'static/assets/[name].[ext]',
+                  limit: 8192,
                 },
-              ],
-            ].filter(Boolean),
-          },
-        },
-        {
-          test: /\.(css)$/,
-          use: getStyleLoaders('css'),
-        },
-        {
-          test: /\.(less)$/,
-          use: getStyleLoaders('less'),
+              },
+            },
+            {
+              test: /.(tsx|ts|jsx|js)$/,
+              loader: resolve('babel-loader'),
+              include: join('src'),
+              options: {
+                compact: isProduction,
+                cacheDirectory: isDevelopment,
+                cacheCompression: false,
+                presets: [
+                  resolve('@babel/preset-react'),
+                  resolve('@babel/preset-typescript'),
+                ],
+                plugins: [
+                  // isDevelopment && resolve('react-refresh/babel'),
+                  [
+                    resolve('babel-plugin-import'),
+                    {
+                      libraryName: 'antd',
+                      libraryDirectory: 'es',
+                      style: true,
+                    },
+                  ],
+                ].filter(Boolean),
+              },
+            },
+            {
+              test: /\.(css)$/,
+              use: getStyleLoaders('css', isDevelopment),
+            },
+            {
+              test: /\.(less)$/,
+              use: getStyleLoaders('less', isDevelopment),
+            },
+            {
+              loader: 'file-loader',
+              exclude: [/\.(ts|tsx|js|jsx|mjs)$/, /\.html$/, /\.json/],
+              options: {
+                name: 'static/asset/[name].[ext]',
+              },
+            },
+          ],
         },
       ],
     },
     plugins: [
-      new WebpackBar(),
-      new CleanWebpackPlugin(),
-      new HtmlWebpackPlugin({
-        template: `${cwd}/public/index.html`,
+      new CleanWebpackPlugin({
+        cleanOnceBeforeBuildPatterns: ['dist'],
       }),
-      // 当前官方方案并不完美，需要设置window全局属性，故引入社区plugin减少配置
-      isDev && new ReactRefreshPlugin(),
-      !isDev &&
+      new HtmlWebpackPlugin({
+        template: join('public/index.html'),
+        filename: 'index.html',
+      }),
+      isDevelopment && new ProgressPlugin(),
+      // isDevelopment && new ReactRefreshPlugin(),
+      isDevelopment && new FriendlyWebpackPlugin(),
+      isProduction &&
         new MiniCssExtractPlugin({
-          filename: 'jarvis.[hash:8].css',
+          filename: '[name].[hash:8].css',
+          chunkFilename: '[name].[hash:8].css',
+          ignoreOrder: true,
         }),
     ].filter(Boolean),
   } as Configuration;
-};
+}

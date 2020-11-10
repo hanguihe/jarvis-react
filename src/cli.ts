@@ -32,11 +32,10 @@ switch (args._[0]) {
     logger.cyan('执行新建项目命令');
     break;
   case 'dev':
-    logger.gray('$ jarvis dev');
     require('./cmd/dev/index');
     break;
   case 'build':
-    logger.cyan('执行构建命令');
+    require('./cmd/build/index');
     break;
   case 'standard':
     require('./cmd/standard/index');

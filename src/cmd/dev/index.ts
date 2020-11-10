@@ -1,11 +1,11 @@
 import webpack from 'webpack';
 import DevServer, { Configuration } from 'webpack-dev-server';
-import Config from '../../webpack/config';
-import devServer from './devServer.json';
+import config from '../../webpack/config';
+import devServer from '../../webpack/devServer.json';
 
 process.env.NODE_ENV = 'development';
 
-const compiler = webpack(Config('development'));
+const compiler = webpack(config());
 const { port } = devServer;
 
 const server = new DevServer(compiler, devServer as Configuration);

@@ -2,6 +2,9 @@
 .vscode
 .idea
 
+# build
+dist
+
 # modules
 /node_modules
 

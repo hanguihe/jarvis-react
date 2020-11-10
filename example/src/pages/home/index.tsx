@@ -1,14 +1,14 @@
 import React from 'react';
 import { Button } from 'antd';
-import './style.less';
+import styles from './style.module.less';
 
-function HomePage() {
+const HomePage: React.FC<{}> = () => {
   return (
-    <div className="home-page">
+    <div className={styles['home-page']}>
       <h2>Hello,React!</h2>
       <Button type="primary">GOT IT !!!</Button>
     </div>
   );
-}
+};
 
 export default HomePage;
