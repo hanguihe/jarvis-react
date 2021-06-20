@@ -1,121 +1,115 @@
-import { Configuration, ProgressPlugin } from 'webpack';
-
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import FriendlyWebpackPlugin from 'friendly-errors-webpack-plugin';
-import { default as ESBuildPlugin } from 'esbuild-webpack-plugin';
-
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import {
+  Configuration,
+  HotModuleReplacementPlugin,
+  ProgressPlugin,
+} from 'webpack';
+import { resolveProjectFile } from '../util/function';
 
-function resolve(name: string) {
-  return require.resolve(name);
-}
+export default function (env: 'production' | 'development'): Configuration {
+  const isDevelopment = env === 'development';
+  const isProduction = env === 'production';
 
-function join(name: string) {
-  return `${process.cwd()}/${name}`;
-}
-
-function getStyleLoaders(type: 'css' | 'less', isDev: boolean) {
-  return [
-    isDev && resolve('style-loader'),
-    !isDev && {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        esModule: true,
-      },
-    },
+  const cssRules = [
+    isDevelopment && require.resolve('style-loader'),
+    isProduction && { loader: MiniCssExtractPlugin.loader },
     {
-      loader: resolve('css-loader'),
+      loader: require.resolve('css-loader'),
       options: {
-        importLoaders: Number(type === 'css'),
-        sourceMap: isDev,
+        sourceMap: isDevelopment,
         modules: {
           auto: true,
         },
       },
     },
-    type === 'less' && {
-      loader: resolve('less-loader'),
-      options: {
-        lessOptions: {
-          javascriptEnabled: true,
-        },
-      },
-    },
   ].filter(Boolean);
-}
-
-export default function () {
-  const env = process.env.NODE_ENV;
-  const isDevelopment = env === 'development';
-  const isProduction = env === 'production';
 
   return {
     mode: env,
-    entry: join('src/app'),
+    bail: isProduction,
+    devtool: isDevelopment ? 'cheap-module-source-map' : false,
+    entry: resolveProjectFile('src/app.tsx'),
     output: {
-      filename: 'jarvis.[hash:8].js',
-      chunkFilename: 'jarvis-chunk.[hash:9].js',
-      path: join('dist'),
-      publicPath: './',
+      path: resolveProjectFile('dist'),
+      filename: isDevelopment ? 'jarvis.js' : 'jarvis.[contenthash:8].js',
+      chunkFilename: isDevelopment
+        ? 'jarvis-chunk.js'
+        : 'jarvis.[contenthash:8]-chunk.js',
+      publicPath: isDevelopment ? '/' : './',
     },
-    devtool: isDevelopment ? 'cheap-module-source-map' : 'none',
-    stats: isDevelopment
-      ? 'none'
-      : {
-          all: false,
-          assets: true,
-          builtAt: true,
-          errors: true,
-          errorDetails: true,
-          timings: true,
-          version: true,
-          warnings: true,
-        },
-    resolve: {
-      extensions: ['.tsx', '.ts', '.jsx', '.js'],
-      alias: {
-        '@': join('src'),
-      },
+    cache: {
+      type: 'filesystem',
+      cacheDirectory: resolveProjectFile('node_modules/.cache'),
     },
     optimization: {
-      // minimizer: [new ESBuildPlugin()],
-      splitChunks: {
-        chunks: 'all',
+      minimize: isProduction,
+      minimizer: [
+        new ESBuildMinifyPlugin({
+          target: 'es2015',
+          css: true,
+        }),
+      ],
+    },
+    resolve: {
+      modules: ['node_modules'],
+      extensions: ['.tsx', '.ts', '.jsx', '.js'],
+      alias: {
+        '@': resolveProjectFile('src'),
       },
     },
     performance: false,
     module: {
+      strictExportPresence: true,
       rules: [
+        { parser: { requireEnsure: false } },
         {
           oneOf: [
             {
+              test: /\.svg$/,
+              type: 'asset/inline',
+            },
+            {
               test: /\.(bmp|gif|jpe?g|png)$/,
-              use: {
-                loader: resolve('url-loader'),
-                options: {
-                  name: 'static/assets/[name].[ext]',
-                  limit: 8192,
+              type: 'asset',
+              parser: {
+                dataUrlCondition: {
+                  maxSize: 10240,
                 },
               },
             },
             {
-              test: /.(tsx|ts|jsx|js)$/,
-              loader: resolve('babel-loader'),
-              include: join('src'),
+              test: /\.(tsx|ts|jsx|js)$/,
+              loader: require.resolve('babel-loader'),
+              include: resolveProjectFile('src'),
               options: {
-                compact: isProduction,
-                cacheDirectory: isDevelopment,
+                babelrc: false,
+                configFile: false,
+                cacheDirectory: true,
                 cacheCompression: false,
+                compact: isProduction,
                 presets: [
-                  resolve('@babel/preset-react'),
-                  resolve('@babel/preset-typescript'),
+                  [
+                    require.resolve('@babel/preset-env'),
+                    {
+                      modules: false,
+                    },
+                  ],
+                  [
+                    require.resolve('@babel/preset-react'),
+                    {
+                      runtime: 'automatic',
+                    },
+                  ],
+                  require.resolve('@babel/preset-typescript'),
                 ],
                 plugins: [
-                  // isDevelopment && resolve('react-refresh/babel'),
+                  isDevelopment && require.resolve('react-refresh/babel'),
+                  require.resolve('@babel/plugin-transform-runtime'),
                   [
-                    resolve('babel-plugin-import'),
+                    require.resolve('babel-plugin-import'),
                     {
                       libraryName: 'antd',
                       libraryDirectory: 'es',
@@ -123,44 +117,56 @@ export default function () {
                     },
                   ],
                 ].filter(Boolean),
+                sourceType: 'unambiguous',
               },
             },
             {
-              test: /\.(css)$/,
-              use: getStyleLoaders('css', isDevelopment),
+              test: /\.css$/,
+              // @ts-ignore
+              use: [...cssRules],
             },
             {
-              test: /\.(less)$/,
-              use: getStyleLoaders('less', isDevelopment),
+              test: /\.less$/,
+              use: [
+                // @ts-ignore
+                ...cssRules,
+                // @ts-ignore
+                {
+                  loader: require.resolve('less-loader'),
+                  options: {
+                    lessOptions: {
+                      modifyVars: {},
+                      javascriptEnabled: true,
+                    },
+                  },
+                },
+              ],
             },
             {
-              loader: 'file-loader',
-              exclude: [/\.(ts|tsx|js|jsx|mjs)$/, /\.html$/, /\.json/],
-              options: {
-                name: 'static/asset/[name].[ext]',
-              },
+              exclude: [/\.(js|jsx|ts|tsx|html|json)$/],
+              type: 'asset/resource',
             },
           ],
         },
       ],
     },
+    // @ts-ignore
     plugins: [
-      new CleanWebpackPlugin({
-        cleanOnceBeforeBuildPatterns: ['dist'],
-      }),
       new HtmlWebpackPlugin({
-        template: join('public/index.html'),
-        filename: 'index.html',
+        inject: true,
+        template: resolveProjectFile('public/index.html'),
       }),
       isDevelopment && new ProgressPlugin(),
-      // isDevelopment && new ReactRefreshPlugin(),
-      isDevelopment && new FriendlyWebpackPlugin(),
+      isDevelopment && new HotModuleReplacementPlugin(),
+      isDevelopment &&
+        new ReactRefreshPlugin({
+          overlay: false,
+        }),
       isProduction &&
         new MiniCssExtractPlugin({
-          filename: '[name].[hash:8].css',
-          chunkFilename: '[name].[hash:8].css',
-          ignoreOrder: true,
+          filename: '[name].[contenthash:8].css',
+          chunkFilename: '[name].[contenthash:8]-chunk.css',
         }),
     ].filter(Boolean),
-  } as Configuration;
+  };
 }

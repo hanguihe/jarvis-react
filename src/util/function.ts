@@ -1,25 +1,7 @@
-import { resolve } from 'path';
-import { prompt } from 'inquirer';
+import { join } from 'path';
 import { cyan, gray } from 'chalk';
 import ora from 'ora';
-import { readFileSync, writeFileSync } from 'fs';
-
-/**
- * @description 终端交互 - 询问
- * @param message
- * @return Promise<Boolean>
- */
-export async function confirm(message: string) {
-  const { answer } = await prompt([
-    {
-      type: 'confirm',
-      name: 'answer',
-      message,
-      default: true,
-    },
-  ]);
-  return answer;
-}
+import fs from 'fs-extra';
 
 /**
  * 打印信息
@@ -34,19 +16,26 @@ export const logger = {
   success: (text: string) => {
     return ora().succeed(text);
   },
+  error: (text: string) => {
+    return ora().fail(text);
+  },
 };
 
-/**
- * 读取项目package.json文件
- */
-export function getPackageInfo() {
-  return JSON.parse(readFileSync(`${process.cwd()}/package.json`, 'utf-8'));
+export function resolveProjectFile(filepath: string) {
+  return join(process.cwd(), filepath);
 }
 
-export function writePackageInfo(info: any) {
-  writeFileSync(`${process.cwd()}/package.json`, JSON.stringify(info));
+export function convertTime(time: number): string {
+  const second = time / 1000;
+
+  if (second <= 60) {
+    return `${second}s`;
+  }
+  return `${Math.floor(second / 100)}m${(second % 60).toFixed(2)}s`;
 }
 
-export function getLocalModulesPath(name: string) {
-  return resolve(__dirname, `../../node_modules/${name}`);
+export function readProjectPackage() {
+  const pkg = fs.readFileSync(resolveProjectFile('package.json'), { encoding: 'utf-8' });
+
+  return JSON.parse(pkg);
 }

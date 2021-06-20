@@ -16,7 +16,7 @@ const args = parser(process.argv.splice(2), {
  * 3. new：新建一个react项目
  * 4. dev：执行本地项目开发构建
  * 5. build：执行生产环境构建
- * 6. standard：完善当前项目规范，包括：eslint prettier stylelint等
+ * 6. project-configuration：完善当前项目规范，包括：eslint prettier stylelint等
  */
 
 if (args.version && !args._[0]) {
@@ -31,14 +31,17 @@ switch (args._[0]) {
   case 'new':
     logger.cyan('执行新建项目命令');
     break;
+  case 'init':
+    require('./init')(args._[1]);
+    break;
   case 'dev':
-    require('./cmd/dev/index');
+    require('./dev')();
     break;
   case 'build':
-    require('./cmd/build/index');
+    require('./build')();
     break;
-  case 'standard':
-    require('./cmd/standard/index');
+  case 'project-configuration':
+    require('./cmd/project-configuration/index');
     break;
   default:
     break;
