@@ -1,9 +1,6 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "module": "CommonJS",
-    "types": ["node"],
-    "outDir": "./lib",
+    "target": "esnext",
     "moduleResolution": "node",
     "jsx": "preserve",
     "skipLibCheck": true,
@@ -14,18 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true
+    "declaration": true
   },
-  "include": ["src/**/*"],
-  "exclude": [
-    "resource",
-    "node_modules",
-    "dist",
-    "**/*.spec.ts",
-    "lib",
-    "examples",
-    "bin"
-  ]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "lib", "fixtures", "bin", "examples"]
 }
