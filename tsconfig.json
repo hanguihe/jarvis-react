@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./lib",
-    "target": "esnext",
+    "target": "es5",
     "moduleResolution": "node",
     "jsx": "preserve",
     "skipLibCheck": true,
@@ -12,7 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
-    "declaration": true
+    "declaration": true,
+    "downlevelIteration": true
   },
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "lib", "fixtures", "bin", "examples"]
 }

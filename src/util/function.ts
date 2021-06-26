@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { cyan, gray } from 'chalk';
+import { cyan, gray, yellow } from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
 
@@ -18,6 +18,9 @@ export const logger = {
   },
   error: (text: string) => {
     return ora().fail(text);
+  },
+  warn: (text: string) => {
+    console.log(yellow(text));
   },
 };
 
@@ -38,4 +41,8 @@ export function readProjectPackage() {
   const pkg = fs.readFileSync(resolveProjectFile('package.json'), { encoding: 'utf-8' });
 
   return JSON.parse(pkg);
+}
+
+export function getProjectConfig() {
+  return require(resolveProjectFile('jarvis.config.js'));
 }

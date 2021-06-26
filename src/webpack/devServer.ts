@@ -11,6 +11,7 @@ export default function (): Configuration {
     hot: true,
     hotOnly: false,
     noInfo: true,
+    stats: 'none',
     port: 3000,
   };
 }

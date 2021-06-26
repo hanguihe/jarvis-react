@@ -1,54 +1,54 @@
-import ora from 'ora';
 import webpack from 'webpack';
 import Server from 'webpack-dev-server';
-import getWebpackConfig from './webpack/config';
-import getServerConfig from './webpack/devServer';
+import { logger } from './util/function';
+import getConfig from './webpack';
 
 process.env.NODE_ENV = 'development';
 
 function dev() {
-  const spinner = ora();
+  logger.cyan('start development server...');
 
-  const config = getServerConfig();
+  const { webpackConfig, serverConfig } = getConfig('development', true);
 
-  const compiler = webpack(getWebpackConfig('development'));
+  const compiler = webpack(webpackConfig);
 
   compiler.hooks.invalid.tap('invalid', () => {
-    spinner.start('compiling...');
+    logger.cyan('start compilie...');
   });
 
   compiler.hooks.done.tap('done', (stats) => {
     const info = stats.toJson({ all: false, errors: true, warnings: true });
 
     if (Array.isArray(info.errors) && info.errors.length > 0) {
-      spinner.fail('fail to compile');
+      console.log();
+      logger.error('fail to compilie');
+
       info.errors.forEach((item) => {
         console.error(item.moduleName);
         console.error(item.message);
       });
-      process.exit(1);
+      return;
     }
 
     if (Array.isArray(info.warnings) && info.warnings.length > 0) {
-      console.warn('compile with warnings..');
+      logger.warn('compile with warnings..');
       info.warnings.forEach((item) => {
         console.error(item.moduleName);
         console.error(item.message);
       });
     }
 
-    spinner.succeed('success to compile \n');
+    console.log();
+    logger.success('success to compile \n');
   });
 
   // @ts-ignore
-  const server = new Server(compiler, config);
-  server.listen(config.port || 3000, config.host || 'localhost', (err) => {
+  const server = new Server(compiler, serverConfig);
+  server.listen(serverConfig.port || 3000, serverConfig.host || 'localhost', (err) => {
     if (err) {
-      spinner.fail('compile with errors');
+      logger.error('compile with errors');
       throw err;
     }
-
-    spinner.start('start development server..');
   });
 }
 
