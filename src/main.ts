@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 import { logger } from './util/function';
+import fs from 'fs-extra';
 
 const args = parser(process.argv.splice(2), {
   alias: {
@@ -27,22 +28,27 @@ if (args.version && !args._[0]) {
   args._[0] = 'help';
 }
 
-switch (args._[0]) {
-  case 'new':
-    logger.cyan('执行新建项目命令');
-    break;
-  case 'init':
-    require('./init')(args._[1]);
-    break;
-  case 'dev':
-    require('./dev')();
-    break;
-  case 'build':
-    require('./build')();
-    break;
-  case 'project-configuration':
-    require('./cmd/project-configuration/index');
-    break;
-  default:
-    break;
+try {
+  switch (args._[0]) {
+    case 'new':
+      logger.cyan('执行新建项目命令');
+      break;
+    case 'init':
+      require('./init')(args._[1]);
+      break;
+    case 'dev':
+      require('./dev')();
+      break;
+    case 'build':
+      require('./build')();
+      break;
+    case 'project-configuration':
+      require('./cmd/project-configuration/index');
+      break;
+    default:
+      break;
+  }
+} catch (err) {
+  fs.writeFileSync('./log.txt', err.toString());
+  throw err;
 }

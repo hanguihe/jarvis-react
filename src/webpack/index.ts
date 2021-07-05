@@ -36,6 +36,8 @@ export default function initWebpackConfig(
   const pjtConfig = getProjectConfig();
   const webpackConfig = getWebpackConfig(mode);
 
+  console.log(pjtConfig);
+
   if (pjtConfig.themes) {
     // @ts-ignore
     const lessRule = webpackConfig.module.rules[1].oneOf[4].use[2];

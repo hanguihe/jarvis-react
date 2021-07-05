@@ -2,6 +2,12 @@ import { join } from 'path';
 import { cyan, gray, yellow } from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
+import { UserConfig } from '../type';
+
+export const defaultBuildOptions: UserConfig = {
+  mode: 'app',
+  outDir: 'dist',
+};
 
 /**
  * 打印信息
@@ -28,7 +34,11 @@ export function resolveProjectFile(filepath: string) {
   return join(process.cwd(), filepath);
 }
 
-export function convertTime(time: number): string {
+export function convertTime(time?: number): string {
+  if (typeof time !== 'number') {
+    return '0s';
+  }
+
   const second = time / 1000;
 
   if (second <= 60) {
@@ -45,4 +55,19 @@ export function readProjectPackage() {
 
 export function getProjectConfig() {
   return require(resolveProjectFile('jarvis.config.js'));
+}
+
+export function getUserConfig(): UserConfig {
+  const path = resolveProjectFile('jarvis.config.js');
+
+  try {
+    return {
+      ...defaultBuildOptions,
+      ...require(path),
+    };
+  } catch {
+    return {
+      ...defaultBuildOptions,
+    };
+  }
 }
