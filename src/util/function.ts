@@ -2,11 +2,12 @@ import { join } from 'path';
 import { cyan, gray, yellow } from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
-import { UserConfig } from '../type';
+import { BuildOptions, UserConfig } from '../type';
 
 export const defaultBuildOptions: UserConfig = {
   mode: 'app',
   outDir: 'dist',
+  port: 3000,
 };
 
 /**
@@ -53,21 +54,16 @@ export function readProjectPackage() {
   return JSON.parse(pkg);
 }
 
-export function getProjectConfig() {
-  return require(resolveProjectFile('jarvis.config.js'));
-}
-
 export function getUserConfig(): UserConfig {
   const path = resolveProjectFile('jarvis.config.js');
+  const options = { ...defaultBuildOptions };
 
   try {
     return {
-      ...defaultBuildOptions,
+      ...options,
       ...require(path),
     };
   } catch {
-    return {
-      ...defaultBuildOptions,
-    };
+    return options;
   }
 }

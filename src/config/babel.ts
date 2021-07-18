@@ -1,18 +1,12 @@
 import babel, { TransformOptions } from '@babel/core';
 import { BuildOptions } from '../type';
 
-export function getBabelConfig(type: 'cjs' | 'esm', options?: BuildOptions) {
-  const mode = options?.mode || 'app';
-  const env = process.env.NODE_ENV;
-  const isDevelopment = env === 'development';
-  const isProduction = env === 'production';
+export function getBabelConfig(type: 'cjs' | 'esm', options: BuildOptions) {
+  const { mode = 'app', isDevelopment, isProduction } = options;
 
-  return {
+  const config: TransformOptions = {
     babelrc: false,
     configFile: false,
-    cacheDirectory: mode === 'app',
-    cacheCompression: false,
-    compact: mode === 'app' && isProduction,
     sourceType: 'unambiguous',
     presets: [
       [
@@ -29,36 +23,47 @@ export function getBabelConfig(type: 'cjs' | 'esm', options?: BuildOptions) {
       ],
       require.resolve('@babel/preset-typescript'),
     ],
-    plugins: [
-      isDevelopment && require.resolve('react-refresh/babel'),
-      // 打包app时引入runtime
-      mode === 'app' && require.resolve('@babel/plugin-transform-runtime'),
-      // 打包组件时需要转换引入的文件 less → css
-      mode === 'component' && [
-        {
-          name: 'rename-less',
-          visitor: {
-            ImportDeclaration: (path: any) => {
-              if (path.node.source.value.endsWith('.less')) {
-                path.node.source.value = path.node.source.value.replace(/\.less$/, '.css');
-              }
-            },
+    plugins: [require.resolve('@babel/plugin-transform-runtime')],
+  };
+
+  if (mode === 'component') {
+    // 打包组件时需要转换引入的文件 less → css
+    config.plugins!.push([
+      {
+        name: 'rename-less',
+        visitor: {
+          ImportDeclaration: (path: any) => {
+            if (path.node.source.value.endsWith('.less')) {
+              path.node.source.value = path.node.source.value.replace(/\.less$/, '.css');
+            }
           },
         },
-      ],
-      [
-        require.resolve('babel-plugin-import'),
-        {
-          libraryName: 'antd',
-          libraryDirectory: 'es',
-          style: true,
-        },
-      ],
-    ].filter(Boolean),
-  } as TransformOptions;
+      },
+    ]);
+  } else {
+    if (isProduction) {
+      config.compact = true;
+    }
+
+    config.plugins!.push([
+      require.resolve('babel-plugin-import'),
+      {
+        libraryName: 'antd',
+        libraryDirectory: 'es',
+        style: true,
+      },
+    ]);
+  }
+
+  if (isDevelopment) {
+    config.plugins!.push(require.resolve('react-refresh/babel'));
+  }
+
+  return config;
 }
 
 export default function babelTransform(type: 'cjs' | 'esm', file: any) {
+  // @ts-ignore
   const config = getBabelConfig(type);
 
   return (

@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
-import { logger } from './util/function';
 import fs from 'fs-extra';
+import { logger } from './util/function';
 
 const args = parser(process.argv.splice(2), {
   alias: {
@@ -41,9 +41,6 @@ try {
       break;
     case 'build':
       require('./build')();
-      break;
-    case 'project-configuration':
-      require('./cmd/project-configuration/index');
       break;
     default:
       break;

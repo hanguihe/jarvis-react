@@ -1,15 +1,11 @@
-import fs from 'fs-extra';
 import ora from 'ora';
+import fs from 'fs-extra';
 import webpack from 'webpack';
-import { convertTime, getUserConfig, resolveProjectFile } from './util/function';
-import { getWebpackConfig } from './config/webpack';
-import { BuildOptions } from './type';
+import { getWebpackConfig } from '../config/webpack';
+import { convertTime, resolveProjectFile } from '../util/function';
+import { BuildOptions } from '../type';
 
-process.env.NODE_ENV = 'production';
-
-function buildComponent(options: BuildOptions) {}
-
-function buildApp(options: BuildOptions) {
+function app(options: BuildOptions) {
   const spinner = ora();
 
   const publicDirPath = resolveProjectFile('public');
@@ -28,9 +24,8 @@ function buildApp(options: BuildOptions) {
 
   spinner.start('start to compile with webpack ...');
   const config = getWebpackConfig(options);
-  const compiler = webpack(config);
 
-  console.log(require.resolve('react/jsx-runtime'));
+  const compiler = webpack(config);
 
   compiler.run((err, stats) => {
     if (err) {
@@ -40,7 +35,7 @@ function buildApp(options: BuildOptions) {
 
     const info = stats?.toJson() || {};
 
-    if (Array.isArray(info.errors)) {
+    if (Array.isArray(info.errors) && info.errors.length > 0) {
       spinner.fail('compile with errors');
       info.errors.forEach((item) => {
         console.error(item.moduleName);
@@ -49,7 +44,7 @@ function buildApp(options: BuildOptions) {
       process.exit(1);
     }
 
-    if (Array.isArray(info.warnings)) {
+    if (Array.isArray(info.warnings) && info.warnings.length > 0) {
       spinner.info('compile with warnings');
       info.warnings.forEach((item) => {
         console.error(item.moduleName);
@@ -61,16 +56,4 @@ function buildApp(options: BuildOptions) {
   });
 }
 
-function build() {
-  const cwd = process.cwd();
-
-  const userConfig = getUserConfig();
-
-  if (userConfig.mode === 'component') {
-    return buildComponent({ ...userConfig, cwd });
-  } else {
-    return buildApp({ ...userConfig, cwd });
-  }
-}
-
-module.exports = build;
+export default app;

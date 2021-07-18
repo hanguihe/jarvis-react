@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "outDir": "./lib",
-    "target": "es5",
+    "target": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "jsx": "preserve",
     "skipLibCheck": true,
@@ -12,7 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
-    "declaration": true,
     "downlevelIteration": true
   },
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "lib", "fixtures", "bin", "examples"]

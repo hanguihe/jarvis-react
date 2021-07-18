@@ -1,88 +1,77 @@
-import { Configuration, HotModuleReplacementPlugin, ProgressPlugin } from 'webpack';
+import { Configuration, HotModuleReplacementPlugin, ProgressPlugin, RuleSetRule } from 'webpack';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { ESBuildMinifyPlugin } from 'esbuild-loader';
-import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { resolveProjectFile } from '../util/function';
-import { getBabelConfig } from './babel';
 import { BuildOptions } from '../type';
+import { getBabelConfig } from './babel';
+
+function getStyleRules(type: 'css' | 'less', options: BuildOptions) {
+  const { isDevelopment, sourceMap, themes = {} } = options;
+
+  const rules: RuleSetRule[] = [
+    {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        esModule: true,
+      },
+    },
+    {
+      loader: require.resolve('css-loader'),
+      options: {
+        importLoaders: type === 'less' ? 1 : 0,
+        sourceMap: sourceMap,
+        modules: {
+          auto: true,
+        },
+      },
+    },
+  ];
+
+  // 开发模式下使用style-loader
+  if (isDevelopment) {
+    rules.splice(0, 1, {
+      loader: require.resolve('style-loader'),
+    });
+  }
+
+  if (type === 'less') {
+    rules.push({
+      loader: require.resolve('less-loader'),
+      options: {
+        lessOptions: {
+          modifyVars: { ...themes },
+          javascriptEnabled: true,
+        },
+      },
+    });
+  }
+
+  return rules;
+}
 
 export function getWebpackConfig(options: BuildOptions) {
-  const env = process.env.NODE_ENV;
-  const isDevelopment = env === 'development';
-  const isProduction = env === 'production';
+  const { outDir = 'dist', sourceMap = false, isDevelopment } = options;
 
   const babelConfig = getBabelConfig('esm', options);
 
-  const getStyleRules = (type: 'css' | 'less') =>
-    [
-      isDevelopment && require.resolve('style-loader'),
-      isProduction && { loader: MiniCssExtractPlugin.loader },
-      {
-        loader: require.resolve('css-loader'),
-        options: {
-          importLoaders: type === 'css' ? 1 : 2,
-          sourceMap: isDevelopment,
-          modules: {
-            auto: true,
-          },
-        },
-      },
-      {
-        loader: require.resolve('postcss-loader'),
-        options: {
-          sourceMap: isDevelopment,
-          postcssOptions: {
-            ident: 'postcss',
-            plugins: [
-              'postcss-flexbugs-fixes',
-              [
-                'postcss-preset-env',
-                {
-                  autoprefixer: {
-                    flexbox: 'no-2009',
-                  },
-                  stage: 3,
-                },
-              ],
-              'postcss-normalize',
-            ],
-          },
-        },
-      },
-      type === 'less' && {
-        loader: require.resolve('less-loader'),
-        options: {
-          lessOptions: {
-            javascriptEnabled: true,
-            // TODO userconfig
-            modifyVars: {},
-          },
-        },
-      },
-    ].filter(Boolean);
-
-  return {
-    mode: env,
-    // 生产环境构建错误直接退出整个流程
-    bail: isProduction,
-    devtool: isDevelopment ? 'cheap-module-source-map' : false,
+  const config: Configuration = {
+    mode: 'production',
+    bail: true,
+    devtool: sourceMap ? 'cheap-module-source-map' : false,
+    performance: false,
     entry: resolveProjectFile('src/app.tsx'),
     output: {
-      path: resolveProjectFile('dist'),
-      filename: isDevelopment ? 'jarvis.js' : 'jarvis.[contenthash:8].js',
-      chunkFilename: isDevelopment ? 'jarvis-chunk.js' : 'jarvis.[contenthash:8]-chunk.js',
-      publicPath: isDevelopment ? '/' : './',
-    },
-    cache: {
-      type: 'filesystem',
-      cacheDirectory: resolveProjectFile('node_modules/.cache'),
+      path: resolveProjectFile(outDir),
+      filename: 'jarvis.[contenthash:8].js',
+      publicPath: './',
     },
     infrastructureLogging: {
       level: 'none',
     },
     optimization: {
-      minimize: isProduction,
+      minimize: true,
       minimizer: [
         new ESBuildMinifyPlugin({
           target: 'es2015',
@@ -91,13 +80,12 @@ export function getWebpackConfig(options: BuildOptions) {
       ],
     },
     resolve: {
-      modules: ['node_modules', resolveProjectFile('node_modules')],
-      extensions: ['.tsx', '.ts', '.jsx', 'jsx'],
+      modules: ['node_modules'],
+      extensions: ['.tsx', '.ts', '.jsx', '.js'],
       alias: {
         '@': resolveProjectFile('src'),
       },
     },
-    performance: false,
     module: {
       strictExportPresence: true,
       rules: [
@@ -120,20 +108,18 @@ export function getWebpackConfig(options: BuildOptions) {
               test: /\.(tsx|ts|jsx|js)$/,
               loader: require.resolve('babel-loader'),
               include: resolveProjectFile('src'),
-              options: {
-                ...babelConfig,
-              },
+              options: { ...babelConfig },
             },
             {
               test: /\.css$/,
-              use: [...getStyleRules('css')],
+              use: [...getStyleRules('css', options)],
             },
             {
-              test: /\.less/,
-              use: [...getStyleRules('less')],
+              test: /\.less$/,
+              use: [...getStyleRules('less', options)],
             },
             {
-              exclude: [/\.(ts?x|js?x|html|json)$/],
+              exclude: [/\.(jsx|tsx|js|ts|html|json)$/],
               type: 'asset/resource',
             },
           ],
@@ -145,17 +131,35 @@ export function getWebpackConfig(options: BuildOptions) {
         inject: true,
         template: resolveProjectFile('public/index.html'),
       }),
-      isDevelopment && new ProgressPlugin(),
-      isDevelopment && new HotModuleReplacementPlugin(),
-      isDevelopment &&
-        new ReactRefreshPlugin({
-          overlay: false,
-        }),
-      isProduction &&
-        new MiniCssExtractPlugin({
-          filename: '[name].[contenthash:8].css',
-          chunkFilename: '[name].[contenthash:8]-chunk.css',
-        }),
-    ].filter(Boolean),
-  } as Configuration;
+      new MiniCssExtractPlugin({
+        filename: '[name].[contenthash:8].css',
+        chunkFilename: '[name].[contenthash:8]-chunk.css',
+      }),
+    ],
+  };
+
+  if (isDevelopment) {
+    config.mode = 'development';
+    config.devtool = 'cheap-module-source-map';
+    config.output!.publicPath = '/';
+    config.output!.filename = 'jarvis.js';
+
+    config.cache = {
+      type: 'filesystem',
+      cacheDirectory: resolveProjectFile('node_modules/.cache'),
+    };
+
+    config.optimization!.minimize = false;
+
+    config.plugins!.pop();
+    config.plugins!.push(
+      new ProgressPlugin(),
+      new HotModuleReplacementPlugin(),
+      new ReactRefreshWebpackPlugin({
+        overlay: false,
+      }),
+    );
+  }
+
+  return config;
 }
