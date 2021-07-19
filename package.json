@@ -1,6 +1,6 @@
 {
   "name": "jarvis-react",
-  "version": "0.2.5-beta.5",
+  "version": "0.2.5-beta.6",
   "description": "React脚手架及命令行工具合集",
   "sideEffects": false,
   "main": "index.js",
