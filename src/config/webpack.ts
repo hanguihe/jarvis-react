@@ -54,7 +54,7 @@ function getStyleRules(type: 'css' | 'less', options: BuildOptions) {
 export function getWebpackConfig(options: BuildOptions) {
   const { outDir = 'dist', sourceMap = false, isDevelopment } = options;
 
-  const babelConfig = getBabelConfig('esm', options);
+  const babelConfig = getBabelConfig({ ...options, buildType: 'esm' });
 
   const config: Configuration = {
     mode: 'production',

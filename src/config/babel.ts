@@ -1,8 +1,8 @@
-import babel, { TransformOptions } from '@babel/core';
+import { transform, TransformOptions } from '@babel/core';
 import { BuildOptions } from '../type';
 
-export function getBabelConfig(type: 'cjs' | 'esm', options: BuildOptions) {
-  const { mode = 'app', isDevelopment, isProduction } = options;
+export function getBabelConfig(options: BuildOptions) {
+  const { mode = 'app', buildType = 'esm', isDevelopment, isProduction } = options;
 
   const config: TransformOptions = {
     babelrc: false,
@@ -12,7 +12,7 @@ export function getBabelConfig(type: 'cjs' | 'esm', options: BuildOptions) {
       [
         require.resolve('@babel/preset-env'),
         {
-          modules: false,
+          modules: buildType === 'esm' ? false : 'auto',
         },
       ],
       [
@@ -62,12 +62,9 @@ export function getBabelConfig(type: 'cjs' | 'esm', options: BuildOptions) {
   return config;
 }
 
-export default function babelTransform(type: 'cjs' | 'esm', file: any) {
-  // @ts-ignore
-  const config = getBabelConfig(type);
-
+export function babelTransform(config: TransformOptions, file: any) {
   return (
-    babel.transform(file.contents, {
+    transform(file.contents, {
       ...config,
       filename: file.path,
     })?.code || ''
