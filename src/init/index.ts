@@ -27,7 +27,7 @@ async function initConfig() {
   logger.cyan('🔨  初始化项目工程规范配置\n');
 
   // 1. 复制项目配置文件
-  const resourcePath = join(__dirname, '../../resource/project-configuration/');
+  const resourcePath = join(__dirname, '../../resource/config/');
   const projectPath = process.cwd() + '/';
 
   const resources = fs.readdirSync(resourcePath);

@@ -8,7 +8,7 @@
   "types": "types.d.ts",
   "files": [
     "lib",
-    "src/resource",
+    "resource",
     "bin"
   ],
   "bin": {
