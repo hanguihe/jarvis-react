@@ -2,10 +2,12 @@ import ora from 'ora';
 import fs from 'fs-extra';
 import webpack from 'webpack';
 import { getWebpackConfig } from '../config/webpack';
-import { convertTime, resolveProjectFile } from '../util/function';
+import { convertTime, logger, resolveProjectFile } from '../util/function';
 import { BuildOptions } from '../type';
 
 function app(options: BuildOptions) {
+  logger.cyan('start build app with webpack...');
+
   const spinner = ora();
 
   const publicDirPath = resolveProjectFile('public');

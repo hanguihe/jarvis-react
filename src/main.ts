@@ -1,5 +1,4 @@
 import parser from 'yargs-parser';
-import fs from 'fs-extra';
 import { logger } from './util/function';
 
 const args = parser(process.argv.splice(2), {
@@ -30,9 +29,6 @@ if (args.version && !args._[0]) {
 
 try {
   switch (args._[0]) {
-    case 'new':
-      logger.cyan('执行新建项目命令');
-      break;
     case 'init':
       require('./init')(args._[1]);
       break;
@@ -46,6 +42,5 @@ try {
       break;
   }
 } catch (err) {
-  fs.writeFileSync('./log.txt', err.toString());
   throw err;
 }

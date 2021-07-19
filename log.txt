@@ -1,3 +1,0 @@
-yarn run v1.22.10
-$ tsc
-Done in 3.22s.
