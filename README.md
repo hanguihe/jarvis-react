@@ -8,7 +8,9 @@ React 开发工具合集：
 
 ### 功能
 
-[ ] 初始化项目/组件开发模板
+[x] 初始化项目开发模板
+
+[ ] 初始化组件开发模板
 
 [x] 初始化项目配置文件：tsconfig jsconfig perttier eslint stylelint editorconfig
 
@@ -35,7 +37,13 @@ $ npm install -g jarvis-react
 1. 初始化项目配置
 
 ```bash
-jarvis init config
+$ jarvis init config
+```
+
+2. 初始化应用项目工程目录
+
+```bash
+$ jarvis init app [name?]
 ```
 
 2. 本地开发 React 应用或组件
