@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "name": "jarvis-app",
+  "scripts": {
+    "start": "jarvis dev",
+    "build": "jarvis build",
+    "prettier": "prettier -c --write \"src/**/*\"",
+    "style-fix": "stylelint --fix \"src/**/*.less\" --syntax less",
+    "eslint-fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.6.2",
+    "@reduxjs/toolkit": "^1.6.1",
+    "antd": "^4.16.8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-router-dom": "^5.2.0",
+    "redux": "^4.1.0",
+    "umi-request": "^1.3.9"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.14",
+    "@types/react-dom": "^17.0.9",
+    "@types/react-router-dom": "^5.1.8",
+    "@umijs/fabric": "^2.6.2",
+    "eslint": "^7.31.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "jarvis-react": "^0.3.0",
+    "prettier": "^2.3.2"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src"
+    ]
+  }
+}

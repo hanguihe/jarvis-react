@@ -30,7 +30,7 @@ if (args.version && !args._[0]) {
 try {
   switch (args._[0]) {
     case 'init':
-      require('./init')(args._[1]);
+      require('./init')(args._[1], args._.slice(2, args._.length));
       break;
     case 'dev':
       require('./dev')();

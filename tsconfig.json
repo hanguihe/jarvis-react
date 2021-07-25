@@ -15,5 +15,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "downlevelIteration": true
   },
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "lib", "fixtures", "bin", "examples"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "lib", "fixtures", "bin", "examples","resource"]
 }
